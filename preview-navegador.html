@@ -5,11 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Preview Instantâneo — Consultoria Integrada (EF + Nutrição)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              sage: {
+                50: '#F4F7F4',
+                100: '#E6EFE8',
+                200: '#CFE0D3',
+                300: '#B0CBB7',
+                400: '#8BAE95',
+                500: '#6B9076',
+                600: '#52735C',
+                700: '#415B49',
+                800: '#35493C',
+                900: '#2C3C32',
+              },
+              clay: {
+                50: '#F9F6F3',
+                100: '#F0EAE3',
+                200: '#E2D6C8',
+                300: '#CEB9A5',
+                400: '#B5997F',
+                500: '#9B7E63',
+                600: '#82664E',
+                700: '#6A523F',
+                800: '#584436',
+                900: '#49392E',
+              },
+            },
+          },
+        },
+      };
+    </script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
-  <body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+  <body class="bg-[#F5F4F0] text-stone-800 antialiased selection:bg-sage-200 selection:text-stone-900">
     <div id="root">
       <div class="min-h-screen flex items-center justify-center text-sm text-slate-400">
         Carregando módulos da Consultoria Integrada (Educação Física & Nutrição)...

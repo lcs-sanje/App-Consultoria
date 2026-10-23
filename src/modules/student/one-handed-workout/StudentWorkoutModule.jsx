@@ -39,7 +39,6 @@ export function StudentWorkoutModule() {
     ? exerciseMap.get(currentWorkoutItem.exerciseId)
     : null;
 
-  // Encontra a primeira série ainda não concluída do exercício atual
   const activeSetIndex = useMemo(() => {
     if (!currentWorkoutItem?.setsDetail) return 0;
     const idx = currentWorkoutItem.setsDetail.findIndex((s) => !s.completed);
@@ -87,7 +86,6 @@ export function StudentWorkoutModule() {
 
   if (!selectedStudent || !activeSession) return null;
 
-  // Progresso total de séries da sessão
   const totalSetsInSession = exercisesList.reduce(
     (acc, item) => acc + (item.setsDetail?.length || 0),
     0
@@ -116,12 +114,10 @@ export function StudentWorkoutModule() {
       true
     );
 
-    // Inicia automaticamente o cronômetro de descanso prescrito pelo treinador
     const prescribedRest = Number(currentWorkoutItem.restSeconds) || 90;
     setRestSecondsLeft(prescribedRest);
     setIsRestRunning(true);
 
-    // Se era a última série deste exercício e há próximo exercício, avança suavemente
     const isLastSetOfExercise =
       activeSetIndex >= (currentWorkoutItem.setsDetail?.length || 1) - 1;
     if (isLastSetOfExercise && activeExerciseIdx < exercisesList.length - 1) {
@@ -155,7 +151,6 @@ export function StudentWorkoutModule() {
     restingHr: selectedStudent.restingHr || 60,
   });
 
-  // Exercícios substitutos equivalentes (para quando o aparelho está ocupado)
   const substituteExercises = useMemo(() => {
     if (!currentExerciseInfo) return [];
     const explicitSubs = (currentExerciseInfo.substituteIds || [])
@@ -174,9 +169,9 @@ export function StudentWorkoutModule() {
     cardioModalities.find((m) => m.id === cardio.modalityId) || cardioModalities[0];
 
   return (
-    <div className="space-y-4 pb-28">
+    <div className="space-y-4 pb-36">
       {/* Seletor de Divisão (Treino A, B, C) e Barra de Progresso Limpa */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+      <div className="bg-white border border-stone-200 rounded-2xl p-3.5 space-y-3 shadow-sm">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {sessions.map((sess) => (
             <button
@@ -188,8 +183,8 @@ export function StudentWorkoutModule() {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all ${
                 sess.id === activeSession.id
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'bg-slate-950 text-slate-400 border border-slate-800'
+                  ? 'bg-stone-900 text-white shadow-sm'
+                  : 'bg-stone-100 text-stone-600 border border-stone-200'
               }`}
             >
               {sess.code}
@@ -198,15 +193,15 @@ export function StudentWorkoutModule() {
         </div>
 
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-white truncate">{activeSession.title}</span>
-            <span className="font-extrabold text-emerald-400">
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="font-bold text-stone-800 truncate">{activeSession.title}</span>
+            <span className="font-extrabold text-sage-700 whitespace-nowrap">
               {completedSetsInSession}/{totalSetsInSession} séries ({progressPct}%)
             </span>
           </div>
-          <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
             <div
-              className="h-full bg-emerald-500 transition-all duration-300"
+              className="h-full bg-sage-600 transition-all duration-300"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -226,10 +221,10 @@ export function StudentWorkoutModule() {
               onClick={() => setActiveExerciseIdx(idx)}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all ${
                 isCurrent
-                  ? 'bg-slate-800 border-indigo-400 text-white'
+                  ? 'bg-stone-900 border-stone-900 text-white shadow-sm'
                   : allDone
-                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
-                  : 'bg-slate-900/70 border-slate-800 text-slate-400'
+                  ? 'bg-sage-100 border-sage-300 text-sage-800'
+                  : 'bg-white border-stone-200 text-stone-600'
               }`}
             >
               {allDone ? '✓ ' : `${idx + 1}. `}
@@ -241,25 +236,25 @@ export function StudentWorkoutModule() {
 
       {/* CARD PRINCIPAL DO EXERCÍCIO ATIVO — ERGONOMIA DE UMA MÃO (THUMB ZONE) */}
       {currentWorkoutItem && currentExerciseInfo && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-4 shadow-xl">
+        <div className="bg-white border border-stone-200 rounded-3xl p-4 space-y-4 shadow-sm">
           {/* Cabeçalho Limpo do Exercício */}
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-indigo-500/20 text-indigo-300">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-sage-100 text-sage-800 border border-sage-200">
                   {currentExerciseInfo.primaryMuscle}
                 </span>
-                <span className="text-[11px] font-semibold text-amber-300">
+                <span className="text-[11px] font-bold text-clay-700">
                   {currentWorkoutItem.technique}
                 </span>
               </div>
-              <h2 className="text-lg font-extrabold text-white mt-1 leading-snug">
+              <h2 className="text-lg font-extrabold text-stone-900 mt-1 leading-snug">
                 {currentExerciseInfo.name}
               </h2>
-              <p className="text-xs text-slate-300 mt-0.5">
+              <p className="text-xs text-stone-600 mt-0.5">
                 Meta: <strong>{currentWorkoutItem.workSets} séries</strong> •{' '}
                 <strong>{currentWorkoutItem.repRange} reps</strong> •{' '}
-                <strong className="text-indigo-300">{currentWorkoutItem.targetRir}</strong> •
+                <strong className="text-sage-700">{currentWorkoutItem.targetRir}</strong> •
                 Descanso: <strong>{currentWorkoutItem.restSeconds}s</strong>
               </p>
             </div>
@@ -267,7 +262,7 @@ export function StudentWorkoutModule() {
             <button
               type="button"
               onClick={() => setShowSwapDrawer(!showSwapDrawer)}
-              className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 whitespace-nowrap"
+              className="px-3 py-2 rounded-xl text-xs font-bold bg-clay-100 hover:bg-clay-200 text-clay-900 border border-clay-300 whitespace-nowrap"
             >
               ⇄ Aparelho Ocupado
             </button>
@@ -275,15 +270,15 @@ export function StudentWorkoutModule() {
 
           {/* Dica rápida do treinador */}
           {(currentWorkoutItem.notes || currentExerciseInfo.cues) && (
-            <div className="p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300">
-              💡 <strong>Dica:</strong> {currentWorkoutItem.notes || currentExerciseInfo.cues}
+            <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-700">
+              <strong>Dica:</strong> {currentWorkoutItem.notes || currentExerciseInfo.cues}
             </div>
           )}
 
           {/* Gaveta de Troca de Exercício em 1 Toque */}
           {showSwapDrawer && (
-            <div className="p-3 rounded-2xl bg-slate-950 border border-amber-500/40 space-y-2">
-              <div className="text-xs font-bold text-amber-300">
+            <div className="p-3 rounded-2xl bg-clay-50 border border-clay-300 space-y-2">
+              <div className="text-xs font-bold text-clay-900">
                 Aparelho ocupado? Toque para trocar por um substituto equivalente:
               </div>
               <div className="grid grid-cols-1 gap-2">
@@ -300,15 +295,17 @@ export function StudentWorkoutModule() {
                       );
                       setShowSwapDrawer(false);
                     }}
-                    className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left flex items-center justify-between"
+                    className="p-2.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-left flex items-center justify-between gap-2"
                   >
-                    <div>
-                      <div className="text-xs font-bold text-white">{sub.name}</div>
-                      <div className="text-[11px] text-slate-400">
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-stone-900 truncate">{sub.name}</div>
+                      <div className="text-[11px] text-stone-500">
                         Equipamento: {sub.equipment}
                       </div>
                     </div>
-                    <span className="text-xs font-bold text-amber-400">Usar este →</span>
+                    <span className="text-xs font-bold text-clay-800 whitespace-nowrap">
+                      Usar este →
+                    </span>
                   </button>
                 ))}
               </div>
@@ -323,32 +320,32 @@ export function StudentWorkoutModule() {
                 <div
                   key={idx}
                   onClick={() => handleToggleExistingSet(idx, s)}
-                  className={`px-3.5 py-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                  className={`px-3.5 py-2.5 rounded-xl border flex items-center justify-between gap-2 cursor-pointer transition-all ${
                     s.completed
-                      ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
+                      ? 'bg-sage-50 border-sage-300 text-sage-900'
                       : isCurrentSet
-                      ? 'bg-indigo-950/50 border-indigo-500 text-white ring-1 ring-indigo-500/40'
-                      : 'bg-slate-950/70 border-slate-800 text-slate-400'
+                      ? 'bg-stone-100 border-stone-900 text-stone-900 ring-1 ring-stone-900/15'
+                      : 'bg-stone-50 border-stone-200 text-stone-500'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2 min-w-0">
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                      className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase whitespace-nowrap ${
                         s.type === 'W'
-                          ? 'bg-amber-500/20 text-amber-300'
+                          ? 'bg-clay-100 text-clay-800'
                           : s.type === 'T'
-                          ? 'bg-rose-500/20 text-rose-300'
-                          : 'bg-slate-800 text-slate-300'
+                          ? 'bg-stone-800 text-white'
+                          : 'bg-stone-200 text-stone-700'
                       }`}
                     >
                       Série {idx + 1} • {s.label}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm font-extrabold">
+                  <div className="flex items-center gap-3 text-sm font-extrabold whitespace-nowrap">
                     <span>{s.lastWeightKg} kg</span>
                     <span>×</span>
                     <span>{s.lastReps} reps</span>
-                    <span className="text-base">{s.completed ? '✅' : '○'}</span>
+                    <span className="text-base">{s.completed ? '✓' : '○'}</span>
                   </div>
                 </div>
               );
@@ -356,52 +353,52 @@ export function StudentWorkoutModule() {
           </div>
 
           {/* PAINEL DE CONTROLE COM UMA MÃO (ZONA DO POLEGAR — ZERO DIGITAÇÃO) */}
-          <div className="p-4 rounded-2xl bg-slate-950 border-2 border-indigo-500/60 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-300">
-                👉 Série {activeSetIndex + 1} ({activeSet.label}) — Pré-preenchida da última sessão
+          <div className="p-4 rounded-2xl bg-stone-50 border-2 border-sage-400 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-sage-800">
+                Série {activeSetIndex + 1} ({activeSet.label}) — Pré-preenchida
               </span>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-stone-600">
                 1RM Est.: <strong>{oneRmInfo.average} kg</strong>
               </span>
             </div>
 
             {/* Controle de Carga (kg) com Botões Grandes para o Polegar */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-slate-400">
+              <div className="flex justify-between text-xs text-stone-500 font-semibold">
                 <span>CARGA (KG)</span>
-                <span>Toque para ajustar sem teclado</span>
+                <span>Ajuste com 1 toque</span>
               </div>
               <div className="grid grid-cols-5 gap-2 items-center">
                 <button
                   type="button"
                   onClick={() => setDraftWeight((w) => Math.max(0, Number((w - 2.5).toFixed(1))))}
-                  className="py-3 rounded-xl bg-slate-900 active:bg-slate-800 border border-slate-700 text-xs font-extrabold text-slate-200"
+                  className="py-3 rounded-xl bg-white active:bg-stone-100 border border-stone-300 text-xs font-extrabold text-stone-700"
                 >
                   -2.5
                 </button>
                 <button
                   type="button"
                   onClick={() => setDraftWeight((w) => Math.max(0, Number((w - 1).toFixed(1))))}
-                  className="py-3 rounded-xl bg-slate-900 active:bg-slate-800 border border-slate-700 text-sm font-extrabold text-slate-200"
+                  className="py-3 rounded-xl bg-white active:bg-stone-100 border border-stone-300 text-sm font-extrabold text-stone-700"
                 >
                   -1
                 </button>
-                <div className="py-2.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-center">
-                  <span className="text-xl font-black text-white">{draftWeight}</span>
-                  <span className="block text-[10px] text-indigo-300 font-bold">KG</span>
+                <div className="py-2 rounded-xl bg-sage-100 border border-sage-300 text-center">
+                  <span className="text-xl font-black text-stone-900">{draftWeight}</span>
+                  <span className="block text-[10px] text-sage-800 font-bold">KG</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setDraftWeight((w) => Number((w + 1).toFixed(1)))}
-                  className="py-3 rounded-xl bg-slate-900 active:bg-slate-800 border border-slate-700 text-sm font-extrabold text-white"
+                  className="py-3 rounded-xl bg-white active:bg-stone-100 border border-stone-300 text-sm font-extrabold text-stone-900"
                 >
                   +1
                 </button>
                 <button
                   type="button"
                   onClick={() => setDraftWeight((w) => Number((w + 2.5).toFixed(1)))}
-                  className="py-3 rounded-xl bg-slate-900 active:bg-slate-800 border border-slate-700 text-xs font-extrabold text-indigo-300"
+                  className="py-3 rounded-xl bg-white active:bg-stone-100 border border-stone-300 text-xs font-extrabold text-sage-800"
                 >
                   +2.5
                 </button>
@@ -410,7 +407,7 @@ export function StudentWorkoutModule() {
 
             {/* Controle de Repetições com Botões Grandes para o Polegar */}
             <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-slate-400">
+              <div className="flex justify-between text-xs text-stone-500 font-semibold">
                 <span>REPETIÇÕES REALIZADAS</span>
                 <span>Meta: {currentWorkoutItem.repRange} reps</span>
               </div>
@@ -418,18 +415,18 @@ export function StudentWorkoutModule() {
                 <button
                   type="button"
                   onClick={() => setDraftReps((r) => Math.max(1, r - 1))}
-                  className="py-3 rounded-xl bg-slate-900 active:bg-slate-800 border border-slate-700 text-base font-extrabold text-slate-200"
+                  className="py-3 rounded-xl bg-white active:bg-stone-100 border border-stone-300 text-base font-extrabold text-stone-700"
                 >
                   - 1 rep
                 </button>
-                <div className="py-2.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-center">
-                  <span className="text-xl font-black text-white">{draftReps}</span>
-                  <span className="block text-[10px] text-indigo-300 font-bold">REPS</span>
+                <div className="py-2 rounded-xl bg-sage-100 border border-sage-300 text-center">
+                  <span className="text-xl font-black text-stone-900">{draftReps}</span>
+                  <span className="block text-[10px] text-sage-800 font-bold">REPS</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setDraftReps((r) => r + 1)}
-                  className="py-3 rounded-xl bg-slate-900 active:bg-slate-800 border border-slate-700 text-base font-extrabold text-white"
+                  className="py-3 rounded-xl bg-white active:bg-stone-100 border border-stone-300 text-base font-extrabold text-stone-900"
                 >
                   + 1 rep
                 </button>
@@ -440,7 +437,7 @@ export function StudentWorkoutModule() {
             <button
               type="button"
               onClick={handleCompleteSetOneTap}
-              className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-black text-base tracking-wide shadow-lg shadow-emerald-600/30 transition-all"
+              className="w-full py-4 rounded-2xl bg-sage-600 hover:bg-sage-700 active:scale-[0.99] text-white font-black text-base tracking-wide shadow-md transition-all"
             >
               ✓ CONCLUIR SÉRIE {activeSetIndex + 1} ({draftWeight}kg × {draftReps} reps)
             </button>
@@ -450,17 +447,17 @@ export function StudentWorkoutModule() {
 
       {/* CARD DO TREINO AERÓBIO PRESCRITO NA SESSÃO */}
       {cardio.enabled && (
-        <div className="bg-slate-900 border border-sky-500/40 rounded-3xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="bg-white border border-clay-300 rounded-3xl p-4 space-y-3 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-sky-500/20 text-sky-300">
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-clay-100 text-clay-800 border border-clay-200">
                 Cardio Prescrito Pós-Musculação
               </span>
-              <h3 className="text-base font-extrabold text-white mt-1">
+              <h3 className="text-base font-extrabold text-stone-900 mt-1">
                 {cardioModality?.name} — {cardio.durationMin} minutos
               </h3>
             </div>
-            <span className="text-xs font-extrabold text-sky-300">
+            <span className="text-xs font-extrabold text-clay-800">
               Alvo: {cardio.targetZone} (
               {hrZones.zones.find((z) => z.zone === cardio.targetZone)?.minBpm}-
               {hrZones.zones.find((z) => z.zone === cardio.targetZone)?.maxBpm} bpm)
@@ -468,40 +465,40 @@ export function StudentWorkoutModule() {
           </div>
 
           {cardio.method === 'interval' ? (
-            <div className="p-3 rounded-2xl bg-slate-950 border border-sky-500/30 space-y-1 text-xs">
-              <div className="font-bold text-sky-300">
+            <div className="p-3 rounded-2xl bg-clay-50 border border-clay-200 space-y-1 text-xs">
+              <div className="font-bold text-stone-900">
                 Protocolo Intervalado ({cardio.intervalsCount} Tiros):
               </div>
-              <div className="text-rose-300">
-                🔥 Estímulo Forte ({cardio.workSeconds}s): {cardio.workIntensityDesc}
+              <div className="text-[#7D3527] font-semibold">
+                Estímulo Forte ({cardio.workSeconds}s): {cardio.workIntensityDesc}
               </div>
-              <div className="text-emerald-300">
-                💧 Recuperação ({cardio.restSeconds}s): {cardio.restIntensityDesc}
+              <div className="text-sage-800 font-semibold">
+                Recuperação ({cardio.restSeconds}s): {cardio.restIntensityDesc}
               </div>
             </div>
           ) : (
-            <div className="text-xs text-slate-300">
+            <div className="text-xs text-stone-600">
               Ritmo Contínuo Estável{' '}
               {cardio.speedKmh > 0 && `• Velocidade: ${cardio.speedKmh} km/h`}{' '}
               {cardio.inclinePct > 0 && `• Inclinação: ${cardio.inclinePct}%`}
             </div>
           )}
 
-          {cardio.notes && <p className="text-xs text-slate-400">{cardio.notes}</p>}
+          {cardio.notes && <p className="text-xs text-stone-500">{cardio.notes}</p>}
 
-          <div className="flex items-center justify-between pt-1">
-            <div className="text-lg font-black text-white">⏱ {formatClock(cardioTimerSec)}</div>
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="text-lg font-black text-stone-900">⏱ {formatClock(cardioTimerSec)}</div>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setCardioRunning(!cardioRunning)}
                 className={`px-4 py-2.5 rounded-xl text-xs font-extrabold ${
                   cardioRunning
-                    ? 'bg-amber-600 text-white'
-                    : 'bg-sky-600 hover:bg-sky-500 text-white'
+                    ? 'bg-clay-600 text-white'
+                    : 'bg-stone-900 hover:bg-stone-800 text-white'
                 }`}
               >
-                {cardioRunning ? '⏸ Pausar Cardio' : '▶ Iniciar Cronômetro Cardio'}
+                {cardioRunning ? 'Pausar Cardio' : 'Iniciar Cronômetro Cardio'}
               </button>
               {cardioTimerSec > 0 && (
                 <button
@@ -510,7 +507,7 @@ export function StudentWorkoutModule() {
                     setCardioRunning(false);
                     setCardioTimerSec(0);
                   }}
-                  className="px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300"
+                  className="px-3 py-2.5 rounded-xl text-xs font-bold bg-stone-100 text-stone-700 border border-stone-200"
                 >
                   Zerar
                 </button>
@@ -522,9 +519,9 @@ export function StudentWorkoutModule() {
 
       {/* BARRA FLUTUANTE DE DESCANSO AUTOMÁTICO (NÃO-INTRUSIVA NO RODAPÉ) */}
       {(isRestRunning || restSecondsLeft > 0) && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md bg-indigo-950/95 backdrop-blur border-2 border-indigo-400 rounded-2xl p-3 shadow-2xl flex items-center justify-between">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md bg-stone-900 text-stone-50 border border-stone-700 rounded-2xl p-3.5 shadow-xl flex items-center justify-between gap-2">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-300 block">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-sage-300 block">
               Descanso Entre Séries
             </span>
             <span className="text-2xl font-black text-white">
@@ -535,14 +532,14 @@ export function StudentWorkoutModule() {
             <button
               type="button"
               onClick={() => setRestSecondsLeft((s) => Math.max(0, s - 15))}
-              className="px-2.5 py-2 rounded-xl bg-slate-900 text-xs font-bold text-slate-200 border border-slate-700"
+              className="px-2.5 py-2 rounded-xl bg-stone-800 text-xs font-bold text-stone-200 border border-stone-700"
             >
               -15s
             </button>
             <button
               type="button"
               onClick={() => setRestSecondsLeft((s) => s + 15)}
-              className="px-2.5 py-2 rounded-xl bg-slate-900 text-xs font-bold text-slate-200 border border-slate-700"
+              className="px-2.5 py-2 rounded-xl bg-stone-800 text-xs font-bold text-stone-200 border border-stone-700"
             >
               +15s
             </button>
@@ -552,7 +549,7 @@ export function StudentWorkoutModule() {
                 setRestSecondsLeft(0);
                 setIsRestRunning(false);
               }}
-              className="px-3 py-2 rounded-xl bg-rose-600 text-xs font-extrabold text-white"
+              className="px-3 py-2 rounded-xl bg-clay-600 text-xs font-extrabold text-white"
             >
               Pular
             </button>
