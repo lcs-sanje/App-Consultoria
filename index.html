@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Consultoria Integrada | Educação Física & Nutrição</title>
+
+    <!-- Configuração PWA (Progressive Web App) para Instalação no Celular (Brave, Chrome, Safari) -->
+    <meta name="theme-color" content="#52735C" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Consultoria App" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -43,5 +54,14 @@
   <body class="bg-[#F5F4F0] text-stone-800 antialiased selection:bg-sage-200 selection:text-stone-900">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./sw.js', { scope: './' })
+            .catch((err) => console.warn('Falha ao registrar Service Worker PWA:', err));
+        });
+      }
+    </script>
   </body>
 </html>

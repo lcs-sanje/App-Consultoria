@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext.jsx';
 import { StudentCRMModule } from './modules/coach/crm/StudentCRMModule.jsx';
 import { AnamnesisAndEnergyModule } from './modules/coach/anamnesis/AnamnesisAndEnergyModule.jsx';
@@ -9,6 +9,69 @@ import { StudentHomeModule } from './modules/student/home/StudentHomeModule.jsx'
 import { StudentWorkoutModule } from './modules/student/one-handed-workout/StudentWorkoutModule.jsx';
 import { StudentDietModule } from './modules/student/daily-diet/StudentDietModule.jsx';
 import { StudentCheckinModule } from './modules/student/checkin/StudentCheckinModule.jsx';
+
+/**
+ * HOOK DE INSTALAÇÃO PWA (BRAVE / CHROME / SAFARI)
+ * Captura o evento nativo `beforeinstallprompt` para permitir instalar o app com 1 clique.
+ */
+function usePwaInstall() {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [helpMessage, setHelpMessage] = useState('');
+
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+
+    if (isStandalone) {
+      setIsInstalled(true);
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+      setHelpMessage('');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const triggerInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+      return;
+    }
+
+    // Caso o navegador ainda não tenha disparado o prompt automático ou seja iOS/Brave manual
+    setHelpMessage(
+      'Para instalar no Brave/Chrome: toque nos 3 pontinhos do navegador (⋮) e selecione "Instalar aplicativo" ou "Adicionar à tela inicial". No iPhone (Safari): toque em Compartilhar e depois em "Adicionar à Tela de Início".'
+    );
+  };
+
+  return {
+    canPromptDirectly: Boolean(deferredPrompt),
+    isInstalled,
+    helpMessage,
+    setHelpMessage,
+    triggerInstall,
+  };
+}
 
 /**
  * REGISTRO MODULAR DE TELAS (PLUG & PLAY)
@@ -57,7 +120,7 @@ const STUDENT_MODULES = [
 /**
  * AMBIENTE 0: PORTAL DE ESCOLHA (SEPARAÇÃO CLARA ENTRE PROFISSIONAL E ALUNO)
  */
-function EnvironmentPortal() {
+function EnvironmentPortal({ pwa }) {
   const {
     setViewMode,
     students,
@@ -81,6 +144,23 @@ function EnvironmentPortal() {
             <strong>Painel Clínico/Esportivo do Profissional</strong> e o{' '}
             <strong>Aplicativo Mobile do Aluno</strong>.
           </p>
+
+          {!pwa.isInstalled && (
+            <div className="pt-2 flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={pwa.triggerInstall}
+                className="px-4 py-2 rounded-xl bg-clay-100 hover:bg-clay-200 border border-clay-300 text-clay-900 text-xs font-extrabold transition-all shadow-sm"
+              >
+                📲 Instalar Aplicativo no Celular (PWA)
+              </button>
+              {pwa.helpMessage && (
+                <div className="max-w-lg bg-white border border-clay-300 rounded-2xl p-3 text-xs text-stone-700 shadow-sm">
+                  {pwa.helpMessage}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -323,7 +403,7 @@ function CoachApplication() {
 /**
  * AMBIENTE 2: APLICATIVO EXCLUSIVO DO ALUNO (EXPERIÊNCIA MOBILE INDEPENDENTE)
  */
-function StudentMobileApplication() {
+function StudentMobileApplication({ pwa }) {
   const {
     setViewMode,
     activeStudentTab,
@@ -388,11 +468,36 @@ function StudentMobileApplication() {
               {selectedStudent?.name}
             </h1>
           </div>
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-clay-100 text-clay-800 border border-clay-300">
-            Semana {selectedStudent?.workoutPlan?.currentWeek || 1}/
-            {selectedStudent?.workoutPlan?.totalWeeks || 8}
-          </span>
+          <div className="flex items-center gap-1.5">
+            {!pwa.isInstalled && (
+              <button
+                type="button"
+                onClick={pwa.triggerInstall}
+                className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-sage-100 hover:bg-sage-200 text-sage-800 border border-sage-300"
+                title="Instalar aplicativo na tela inicial do celular"
+              >
+                📲 Instalar
+              </button>
+            )}
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-clay-100 text-clay-800 border border-clay-300">
+              Sem. {selectedStudent?.workoutPlan?.currentWeek || 1}/
+              {selectedStudent?.workoutPlan?.totalWeeks || 8}
+            </span>
+          </div>
         </header>
+
+        {pwa.helpMessage && (
+          <div className="mx-3.5 mt-3 p-3 rounded-2xl bg-clay-50 border border-clay-300 text-xs text-stone-700 flex items-start justify-between gap-2">
+            <span>{pwa.helpMessage}</span>
+            <button
+              type="button"
+              onClick={() => pwa.setHelpMessage('')}
+              className="px-2 py-0.5 rounded-lg bg-clay-200 text-clay-900 font-bold text-[10px]"
+            >
+              Fechar
+            </button>
+          </div>
+        )}
 
         {/* Conteúdo da Aba Mobile Ativa */}
         <main className="flex-1 px-3.5 pt-4">
@@ -425,8 +530,10 @@ function StudentMobileApplication() {
 
 function RootRouter() {
   const { viewMode } = useApp();
-  if (viewMode === 'portal') return <EnvironmentPortal />;
-  if (viewMode === 'student') return <StudentMobileApplication />;
+  const pwa = usePwaInstall();
+
+  if (viewMode === 'portal') return <EnvironmentPortal pwa={pwa} />;
+  if (viewMode === 'student') return <StudentMobileApplication pwa={pwa} />;
   return <CoachApplication />;
 }
 
