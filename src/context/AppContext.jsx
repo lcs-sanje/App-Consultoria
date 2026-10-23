@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { storageAdapter } from '../core/storage/storageAdapter.js';
 import { INITIAL_STUDENTS } from '../data/initialMockData.js';
 import { INITIAL_EXERCISES_CATALOG, CARDIO_MODALITIES_CATALOG } from '../data/exercisesCatalog.js';
@@ -10,6 +10,57 @@ export function AppProvider({ children }) {
   const [viewMode, setViewMode] = useState('portal'); // 'portal' | 'coach' | 'student'
   const [activeCoachTab, setActiveCoachTab] = useState('crm'); // 'crm' | 'anamnesis' | 'workout' | 'diet' | 'catalogs'
   const [activeStudentTab, setActiveStudentTab] = useState('home'); // 'home' | 'workout' | 'diet' | 'checkin'
+  const isPopStateRef = useRef(false);
+
+  // Sincronização com o botão Voltar do Android / Histórico do Navegador (History API)
+  useEffect(() => {
+    const initialState = {
+      viewMode: 'portal',
+      activeCoachTab: 'crm',
+      activeStudentTab: 'home',
+    };
+    window.history.replaceState(initialState, '');
+
+    const handlePopState = (event) => {
+      isPopStateRef.current = true;
+      if (event.state && event.state.viewMode) {
+        setViewMode(event.state.viewMode);
+        if (event.state.activeCoachTab) setActiveCoachTab(event.state.activeCoachTab);
+        if (event.state.activeStudentTab) setActiveStudentTab(event.state.activeStudentTab);
+      } else {
+        setViewMode('portal');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (isPopStateRef.current) {
+      isPopStateRef.current = false;
+      return;
+    }
+
+    const currentHistoryState = window.history.state;
+    const isSameState =
+      currentHistoryState &&
+      currentHistoryState.viewMode === viewMode &&
+      currentHistoryState.activeCoachTab === activeCoachTab &&
+      currentHistoryState.activeStudentTab === activeStudentTab;
+
+    if (!isSameState) {
+      window.history.pushState(
+        {
+          viewMode,
+          activeCoachTab,
+          activeStudentTab,
+        },
+        ''
+      );
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [viewMode, activeCoachTab, activeStudentTab]);
 
   const [students, setStudents] = useState(() =>
     storageAdapter.load('students', INITIAL_STUDENTS)
