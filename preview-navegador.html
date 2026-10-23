@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Preview Instantâneo — Consultoria Integrada (EF + Nutrição)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+    <div id="root">
+      <div class="min-h-screen flex items-center justify-center text-sm text-slate-400">
+        Carregando módulos da Consultoria Integrada (Educação Física & Nutrição)...
+      </div>
+    </div>
+
+    <script>
+      /**
+       * Carregador Modular Zero-Build:
+       * Lê diretamente os arquivos modulares de ./src/ em ordem de dependência,
+       * mantendo 100% de compatibilidade com a estrutura Vite + React mesmo sem Node.js instalado.
+       */
+      const MODULE_FILES = [
+        'src/core/formulas/bodyCompFormulas.js',
+        'src/core/formulas/energyFormulas.js',
+        'src/core/formulas/trainingFormulas.js',
+        'src/core/formulas/nutritionFormulas.js',
+        'src/core/storage/storageAdapter.js',
+        'src/data/exercisesCatalog.js',
+        'src/data/foodsCatalog.js',
+        'src/data/anamnesisSchema.js',
+        'src/data/initialMockData.js',
+        'src/context/AppContext.jsx',
+        'src/modules/coach/crm/StudentCRMModule.jsx',
+        'src/modules/coach/anamnesis/AnamnesisAndEnergyModule.jsx',
+        'src/modules/coach/workout-builder/WorkoutBuilderModule.jsx',
+        'src/modules/coach/diet-builder/DietBuilderModule.jsx',
+        'src/modules/coach/catalog-manager/CatalogManagerModule.jsx',
+        'src/modules/student/one-handed-workout/StudentWorkoutModule.jsx',
+        'src/modules/student/daily-diet/StudentDietModule.jsx',
+        'src/modules/student/checkin/StudentCheckinModule.jsx',
+        'src/App.jsx',
+      ];
+
+      const moduleRegistry = {
+        react: Object.assign({ default: window.React, __esModule: true }, window.React),
+        'react-dom/client': Object.assign(
+          { default: window.ReactDOM, __esModule: true },
+          window.ReactDOM
+        ),
+      };
+
+      function resolvePath(baseFile, relativeImport) {
+        if (!relativeImport.startsWith('.')) return relativeImport;
+        const baseParts = baseFile.split('/').slice(0, -1);
+        const relParts = relativeImport.split('/');
+        for (const p of relParts) {
+          if (p === '.' || p === '') continue;
+          if (p === '..') baseParts.pop();
+          else baseParts.push(p);
+        }
+        return baseParts.join('/');
+      }
+
+      async function bootModularApp() {
+        try {
+          for (const filePath of MODULE_FILES) {
+            const res = await fetch(`./${filePath}`);
+            if (!res.ok) throw new Error(`Não foi possível carregar ${filePath}`);
+            const sourceCode = await res.text();
+
+            const compiled = Babel.transform(sourceCode, {
+              presets: ['env', 'react'],
+              filename: filePath,
+            }).code;
+
+            const exportsObj = {};
+            const moduleObj = { exports: exportsObj };
+            const customRequire = (importPath) => {
+              const resolved = resolvePath(filePath, importPath);
+              if (moduleRegistry[resolved]) return moduleRegistry[resolved];
+              throw new Error(`Módulo não encontrado: ${resolved} (importado de ${filePath})`);
+            };
+
+            const fn = new Function('require', 'module', 'exports', 'React', compiled);
+            fn(customRequire, moduleObj, exportsObj, window.React);
+            moduleRegistry[filePath] = moduleObj.exports;
+          }
+
+          const App = moduleRegistry['src/App.jsx'].default;
+          const root = window.ReactDOM.createRoot(document.getElementById('root'));
+          root.render(window.React.createElement(App));
+        } catch (err) {
+          document.getElementById('root').innerHTML = `
+            <div class="p-8 max-w-xl mx-auto text-rose-400 space-y-2">
+              <h2 class="font-bold text-lg">Erro ao iniciar preview:</h2>
+              <pre class="text-xs bg-slate-900 p-4 rounded-xl border border-rose-500/40 whitespace-pre-wrap">${err.message}</pre>
+            </div>
+          `;
+          console.error(err);
+        }
+      }
+
+      bootModularApp();
+    </script>
+  </body>
+</html>
