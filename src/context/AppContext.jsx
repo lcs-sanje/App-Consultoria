@@ -7,9 +7,9 @@ import { INITIAL_FOODS_CATALOG } from '../data/foodsCatalog.js';
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  const [viewMode, setViewMode] = useState('coach'); // 'coach' | 'student'
+  const [viewMode, setViewMode] = useState('portal'); // 'portal' | 'coach' | 'student'
   const [activeCoachTab, setActiveCoachTab] = useState('crm'); // 'crm' | 'anamnesis' | 'workout' | 'diet' | 'catalogs'
-  const [activeStudentTab, setActiveStudentTab] = useState('workout'); // 'today' | 'workout' | 'diet' | 'checkin'
+  const [activeStudentTab, setActiveStudentTab] = useState('home'); // 'home' | 'workout' | 'diet' | 'checkin'
 
   const [students, setStudents] = useState(() =>
     storageAdapter.load('students', INITIAL_STUDENTS)

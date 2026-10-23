@@ -17,10 +17,15 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Garante que inputs e selects respeitem a largura da caixa pai,
+   mas NUNCA força botões a encolherem menos que seu próprio texto */
 input,
 select,
-textarea,
-button {
+textarea {
   max-width: 100%;
   min-width: 0;
+}
+
+button {
+  flex-shrink: 0;
 }

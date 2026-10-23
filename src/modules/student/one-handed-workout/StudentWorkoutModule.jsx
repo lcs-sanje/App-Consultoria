@@ -208,30 +208,40 @@ export function StudentWorkoutModule() {
         </div>
       </div>
 
-      {/* Pílulas de Navegação Rápida entre Exercícios da Sessão */}
-      <div className="flex gap-2 overflow-x-auto py-1">
-        {exercisesList.map((item, idx) => {
-          const ex = exerciseMap.get(item.exerciseId);
-          const allDone = (item.setsDetail || []).every((s) => s.completed);
-          const isCurrent = idx === activeExerciseIdx;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setActiveExerciseIdx(idx)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all ${
-                isCurrent
-                  ? 'bg-stone-900 border-stone-900 text-white shadow-sm'
-                  : allDone
-                  ? 'bg-sage-100 border-sage-300 text-sage-800'
-                  : 'bg-white border-stone-200 text-stone-600'
-              }`}
-            >
-              {allDone ? '✓ ' : `${idx + 1}. `}
-              {ex?.name?.split(' ').slice(0, 3).join(' ')}
-            </button>
-          );
-        })}
+      {/* Pílulas de Navegação Rápida entre Exercícios da Sessão (Com quebra limpa, sem espremer texto) */}
+      <div className="bg-white border border-stone-200 rounded-2xl p-3 shadow-sm">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
+          Exercícios da Sessão (Toque para alternar):
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {exercisesList.map((item, idx) => {
+            const ex = exerciseMap.get(item.exerciseId);
+            const allDone = (item.setsDetail || []).every((s) => s.completed);
+            const isCurrent = idx === activeExerciseIdx;
+            const shortName = ex?.name
+              ? ex.name.length > 22
+                ? `${ex.name.slice(0, 22).trim()}…`
+                : ex.name
+              : 'Exercício';
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveExerciseIdx(idx)}
+                className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left ${
+                  isCurrent
+                    ? 'bg-stone-900 border-stone-900 text-white shadow-sm'
+                    : allDone
+                    ? 'bg-sage-100 border-sage-300 text-sage-800'
+                    : 'bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100'
+                }`}
+              >
+                {allDone ? `✓ ${idx + 1}. ` : `${idx + 1}. `}
+                {shortName}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* CARD PRINCIPAL DO EXERCÍCIO ATIVO — ERGONOMIA DE UMA MÃO (THUMB ZONE) */}
